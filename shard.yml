@@ -1,0 +1,26 @@
+name: cluster_tools
+version: 0.1.0
+
+authors:
+  - William Harris <wharris@upscalews.com>
+  - W. Watson <Watson@vulk.coop>
+  - Denver Williams <denver@debian.nz>
+
+targets:
+  cluster_tools:
+    main: cluster_tools.cr
+
+crystal: '>= 1.0.0'
+
+dependencies:
+  totem:
+    github: icyleaf/totem
+    version: ~> 0.7.0
+  kubectl_client:
+    github: cnf-testsuite/kubectl_client
+    branch: main
+  tar:
+    github: cnf-testsuite/tar
+    branch: main
+
+license: MIT
