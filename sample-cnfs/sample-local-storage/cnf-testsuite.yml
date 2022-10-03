@@ -1,6 +1,0 @@
----
-helm_directory: chart
-helm_values: 
-release_name: coredns
-service_name: coredns-coredns
-allowlist_helm_chart_container_names: []
