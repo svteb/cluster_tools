@@ -13,14 +13,11 @@ targets:
 crystal: '>= 1.0.0'
 
 dependencies:
-  totem:
-    github: icyleaf/totem
-    version: ~> 0.7.0
   kubectl_client:
     github: cnf-testsuite/kubectl_client
     branch: main
-  tar:
-    github: cnf-testsuite/tar
+  docker_client:
+    github: cnf-testsuite/docker_client
     branch: main
 
 license: MIT

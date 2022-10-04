@@ -1,3 +1,10 @@
+require "kubectl_client"
+require "docker_client"
+require "log"
+require "../constants.cr"
+
+#TODO: turn those TESTSUITE_NAMESPACE and into class variable instead of constants
+
 module ClusterTools
   def self.install
     Log.info { "ClusterTools install" }
