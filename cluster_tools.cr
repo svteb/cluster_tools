@@ -1,7 +1,7 @@
 require "kubectl_client"
 require "docker_client"
 require "log"
-require "../constants.cr"
+require "./src/constants.cr"
 
 #TODO: turn those TESTSUITE_NAMESPACE and into class variable instead of constants
 

@@ -1,7 +1,7 @@
 require "log"
 require "./spec_helper"
-require "../src/tasks/utils/cluster_utils.cr"
-require "../src/tasks/constants.cr"
+require "../cluster_tools.cr"
+require "../src/constants.cr"
 
 
 describe "ClusterTools" do
