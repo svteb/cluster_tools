@@ -1,0 +1,26 @@
+on:
+  push:
+    paths:
+      - '**'
+      - '!**.md'
+  pull_request:
+    paths:
+      - '**'
+      - '!**.md'
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download source
+        uses: actions/checkout@v2
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.3.0
+      - name: Run tests
+        run: |
+          shards install
+          crystal spec
