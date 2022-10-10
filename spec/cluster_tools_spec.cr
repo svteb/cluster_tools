@@ -7,11 +7,11 @@ require "../src/constants.cr"
 describe "ClusterTools" do
   before_all do
     begin
-      is_namespace_created =  KubectlClient::Create.namespace(TESTSUITE_NAMESPACE)
+      is_namespace_created =  KubectlClient::Create.namespace(ClusterTools.namespace)
       (is_namespace_created).should be_true
-      Log.info { "#{TESTSUITE_NAMESPACE} namespace created" }
+      Log.info { "#{ClusterTools.namespace} namespace created" }
     rescue e : KubectlClient::Create::AlreadyExistsError
-      Log.info { "#{TESTSUITE_NAMESPACE} namespace already exists on the Kubernetes cluster" }
+      Log.info { "#{ClusterTools.namespace} namespace already exists on the Kubernetes cluster" }
     end
   end
   after_all do

@@ -3,21 +3,29 @@ require "docker_client"
 require "log"
 require "./src/constants.cr"
 
-#TODO: turn those TESTSUITE_NAMESPACE and into class variable instead of constants
-
 module ClusterTools
+  @@namespace = CLUSTER_TOOLS_DEFAULT_NAMESPACE
+
+  def self.change_namespace(name)
+    @@namespace = name
+  end
+
+  def self.namespace
+    @@namespace
+  end
+
   def self.install
     Log.info { "ClusterTools install" }
     File.write("cluster_tools.yml", CLUSTER_TOOLS)
-    KubectlClient::Apply.file("cluster_tools.yml", namespace: TESTSUITE_NAMESPACE)
+    KubectlClient::Apply.file("cluster_tools.yml", namespace: self.namespace)
     wait_for_cluster_tools
   end
 
   def self.uninstall
     Log.info { "ClusterTools uninstall" }
     File.write("cluster_tools.yml", CLUSTER_TOOLS)
-    KubectlClient::Delete.file("cluster_tools.yml", namespace: TESTSUITE_NAMESPACE)
-    KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: TESTSUITE_NAMESPACE)
+    KubectlClient::Delete.file("cluster_tools.yml", namespace: self.namespace)
+    KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: self.namespace)
   end
 
   def self.exec(cli : String)
@@ -29,7 +37,7 @@ module ClusterTools
     Log.info { "cluster_tools_pod_name: #{cluster_tools_pod_name}"}
 
     cmd = "-ti #{cluster_tools_pod_name} -- #{cli}"
-    KubectlClient.exec(cmd, namespace: TESTSUITE_NAMESPACE)
+    KubectlClient.exec(cmd, namespace: self.namespace)
   end
 
 
@@ -47,7 +55,7 @@ module ClusterTools
 
     full_cli = "-ti #{cluster_tools_pod_name} -- #{cli}"
     Log.debug { "ClusterTools exec full cli: #{full_cli}" }
-    exec = KubectlClient.exec(full_cli, namespace: TESTSUITE_NAMESPACE)
+    exec = KubectlClient.exec(full_cli, namespace: self.namespace)
     Log.debug { "ClusterTools exec: #{exec}" }
     exec
   end
@@ -79,8 +87,8 @@ module ClusterTools
 
   def self.wait_for_cluster_tools
     Log.info { "ClusterTools wait_for_cluster_tools" }
-    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: TESTSUITE_NAMESPACE)
-    # KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools-k8s", namespace: TESTSUITE_NAMESPACE)
+    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: self.namespace)
+    # KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools-k8s", namespace: self.namespace)
   end
 
   # https://windsock.io/explaining-docker-image-ids/
@@ -136,12 +144,12 @@ module ClusterTools
   end
 
   def self.pod_name()
-    KubectlClient::Get.pod_status("cluster-tools", namespace: TESTSUITE_NAMESPACE).split(",")[0]
+    KubectlClient::Get.pod_status("cluster-tools", namespace: self.namespace).split(",")[0]
   end
 
   def self.pod_by_node(node)
-    resource = KubectlClient::Get.resource("Daemonset", "cluster-tools", namespace: TESTSUITE_NAMESPACE)
-    pods = KubectlClient::Get.pods_by_resource(resource, namespace: TESTSUITE_NAMESPACE)
+    resource = KubectlClient::Get.resource("Daemonset", "cluster-tools", namespace: self.namespace)
+    pods = KubectlClient::Get.pods_by_resource(resource, namespace: self.namespace)
     cluster_pod = pods.find do |pod|
       pod.dig("spec", "nodeName") == node
     end
