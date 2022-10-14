@@ -1,5 +1,3 @@
-require "kubectl_client"
-require "docker_client"
 require "log"
 require "./src/constants.cr"
 
