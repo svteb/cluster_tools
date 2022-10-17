@@ -2,8 +2,6 @@ require "log"
 require "./spec_helper"
 require "../cluster_tools.cr"
 require "../src/constants.cr"
-require "kubectl_client"
-require "docker_client"
 
 
 describe "ClusterTools" do

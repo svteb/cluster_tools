@@ -12,7 +12,7 @@ targets:
 
 crystal: '>= 1.0.0'
 
-development_dependencies:
+dependencies:
   kubectl_client:
     github: cnf-testsuite/kubectl_client
     branch: main
