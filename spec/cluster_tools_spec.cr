@@ -1,8 +1,6 @@
 require "log"
 require "./spec_helper"
 require "../cluster_tools.cr"
-require "../src/constants.cr"
-
 
 describe "ClusterTools" do
   before_all do
