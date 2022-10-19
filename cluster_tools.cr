@@ -1,6 +1,7 @@
 require "kubectl_client"
 require "docker_client"
 require "log"
+require "ecr"
 
 module ClusterTools
   # Default installation namespace
