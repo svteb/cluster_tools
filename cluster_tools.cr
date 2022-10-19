@@ -4,7 +4,14 @@ require "log"
 require "./src/constants.cr"
 
 module ClusterTools
-  @@namespace = CLUSTER_TOOLS_DEFAULT_NAMESPACE
+  # Default installation namespace
+  @@namespace = "cnf-testsuite"
+
+  class ManifestTemplate
+    def initialize()
+    end
+    ECR.def_to_s("src/templates/manifest.yml.ecr")
+  end
 
   def self.change_namespace(name)
     @@namespace = name
@@ -16,14 +23,14 @@ module ClusterTools
 
   def self.install
     Log.info { "ClusterTools install" }
-    File.write("cluster_tools.yml", CLUSTER_TOOLS)
+    File.write("cluster_tools.yml", ManifestTemplate.new().to_s)
     KubectlClient::Apply.file("cluster_tools.yml", namespace: self.namespace)
     wait_for_cluster_tools
   end
 
   def self.uninstall
     Log.info { "ClusterTools uninstall" }
-    File.write("cluster_tools.yml", CLUSTER_TOOLS)
+    File.write("cluster_tools.yml", ManifestTemplate.new().to_s)
     KubectlClient::Delete.file("cluster_tools.yml", namespace: self.namespace)
     KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: self.namespace)
   end
