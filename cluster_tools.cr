@@ -7,9 +7,10 @@ module ClusterTools
   @@namespace = "cnf-testsuite"
 
   class ManifestTemplate
-    def initialize()
+    def initialize
     end
-    ECR.def_to_s("src/templates/manifest.yml.ecr")
+
+    ECR.def_to_s("#{__DIR__}/src/templates/manifest.yml.ecr")
   end
 
   def self.change_namespace(name)
