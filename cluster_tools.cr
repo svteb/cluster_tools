@@ -53,7 +53,11 @@ module ClusterTools
 
     node = nodes.find{ |n| n.dig?("metadata", "name") == nodeName }
 
-    self.exec_by_node(cli, node)
+    if node
+      self.exec_by_node(cli, node)
+    end
+
+    JSON.parse(%({}))
   end
 
   def self.exec_by_node(cli : String, node : JSON::Any)
