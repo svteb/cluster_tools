@@ -48,8 +48,15 @@ module ClusterTools
     KubectlClient.exec(cmd, namespace: self.namespace)
   end
 
+  def self.exec_by_node(cli : String, nodeName : String)
+    nodes = KubectlClient::Get.nodes["items"].as_a
 
-  def self.exec_by_node(cli : String, node)
+    node = nodes.find{ |n| n.dig?("metadata", "name") == nodeName }
+
+    self.exec_by_node(cli, node)
+  end
+
+  def self.exec_by_node(cli : String, node : JSON::Any)
     # todo change to get all pods, schedulable nodes is slow
 
     # pods_by_nodes internally use KubectlClient::Get.pods which uses --all-namespaces option.
@@ -162,5 +169,11 @@ module ClusterTools
       pod.dig("spec", "nodeName") == node
     end
     cluster_pod.dig("metadata", "name") if cluster_pod
+  end
+
+
+  def self.cluster_tools_pod_by_node(node_name)
+    Log.info { "cluster_tools_pod_by_node node_name: #{node_name}" }
+    cluster_tools_pod = self.pod_by_node(node_name)
   end
 end
