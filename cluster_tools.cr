@@ -55,9 +55,9 @@ module ClusterTools
 
     if node
       self.exec_by_node(cli, node)
+    else
+      ""
     end
-
-    JSON.parse(%({}))
   end
 
   def self.exec_by_node(cli : String, node : JSON::Any)
