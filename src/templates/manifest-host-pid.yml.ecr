@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+    name: cluster-host-pid
+spec:
+  selector:
+    matchLabels:
+      name: cluster-host-pid
+  template:
+    metadata:
+      labels:
+        name: cluster-host-pid
+    spec:
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: cluster-host-pid
+          image: conformance/cluster-tools:v1.0.0
+          imagePullPolicy: Always
+          command: ["/bin/sh"]
+          args: ["-c", "sleep infinity"]
+          securityContext:
+            privileged: true
