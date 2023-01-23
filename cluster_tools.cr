@@ -29,7 +29,7 @@ module ClusterTools
     @@namespace
   end
 
-  def self.install(host_namespace: false)
+  def self.install(host_namespace = false)
     Log.info { "ClusterTools install" }
     if host_namespace
       File.write("cluster_tools.yml", ManifestHostNamespaceTemplate.new().to_s)
@@ -40,7 +40,7 @@ module ClusterTools
     wait_for_cluster_tools
   end
 
-  def self.uninstall(host_namespace: false)
+  def self.uninstall(host_namespace = false)
     Log.info { "ClusterTools uninstall" }
     if host_namespace
       File.write("cluster_tools.yml", ManifestHostNamespaceTemplate.new().to_s)
