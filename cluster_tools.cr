@@ -29,7 +29,7 @@ module ClusterTools
     @@namespace
   end
 
-  def self.install(host_namespace = false)
+  def self.install(host_namespace = true)
     Log.info { "ClusterTools install" }
     if host_namespace
       File.write("cluster_tools.yml", ManifestHostNamespaceTemplate.new().to_s)
@@ -40,7 +40,7 @@ module ClusterTools
     wait_for_cluster_tools
   end
 
-  def self.uninstall(host_namespace = false)
+  def self.uninstall(host_namespace = true)
     Log.info { "ClusterTools uninstall" }
     if host_namespace
       File.write("cluster_tools.yml", ManifestHostNamespaceTemplate.new().to_s)
@@ -49,6 +49,7 @@ module ClusterTools
     end
 
     KubectlClient::Delete.file("cluster_tools.yml", namespace: self.namespace)
+    #todo make this work with cluster-tools-host-namespace
     KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: self.namespace)
   end
 
