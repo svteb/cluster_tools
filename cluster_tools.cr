@@ -92,7 +92,7 @@ module ClusterTools
     full_cli = "-ti #{cluster_tools_pod_name} -- #{cli}"
     Log.debug { "ClusterTools exec full cli: #{full_cli}" }
     if background
-      exec = KubectlClient.exec(full_cli, namespace: self.namespace, background: background)
+      exec = KubectlClient.exec_bg(full_cli, namespace: self.namespace)
     else
       exec = KubectlClient.exec(full_cli, namespace: self.namespace)
     end
