@@ -65,23 +65,8 @@ module ClusterTools
     KubectlClient.exec(cmd, namespace: self.namespace)
   end
 
-  def self.exec_by_node(cli : String, nodeName : String, background=false)
-    nodes = KubectlClient::Get.nodes["items"].as_a
 
-    node = nodes.find{ |n| n.dig?("metadata", "name") == nodeName }
-
-    if node
-      self.exec_by_node(cli, node, background: background)
-    else
-      ""
-    end
-  end
-
-  def self.exec_by_node(cli : String, node : JSON::Any, background=false)
-    # todo change to get all pods, schedulable nodes is slow
-
-    # pods_by_nodes internally use KubectlClient::Get.pods which uses --all-namespaces option.
-    # So they do not have to be passed the namespace to perform operations.
+  def self.exec_by_node_construct_cli(cli : String, node : JSON::Any)
     pods = KubectlClient::Get.pods_by_nodes([node])
     # pods = KubectlClient::Get.pods_by_label(pods, "name", "cluster-tools-k8s")
     pods = KubectlClient::Get.pods_by_label(pods, "name", "cluster-tools")
@@ -91,11 +76,42 @@ module ClusterTools
 
     full_cli = "-ti #{cluster_tools_pod_name} -- #{cli}"
     Log.debug { "ClusterTools exec full cli: #{full_cli}" }
-    if background
-      exec = KubectlClient.exec_bg(full_cli, namespace: self.namespace)
+    return full_cli
+  end
+
+  def self.exec_by_node(cli : String, nodeName : String)
+    nodes = KubectlClient::Get.nodes["items"].as_a
+
+    node = nodes.find{ |n| n.dig?("metadata", "name") == nodeName }
+
+    if node
+      self.exec_by_node(cli, node)
     else
-      exec = KubectlClient.exec(full_cli, namespace: self.namespace)
+      ""
     end
+  end
+    
+
+  def self.exec_by_node(cli : String, node : JSON::Any)
+    # todo change to get all pods, schedulable nodes is slow
+
+    # pods_by_nodes internally use KubectlClient::Get.pods which uses --all-namespaces option.
+    # So they do not have to be passed the namespace to perform operations.
+    full_cli = exec_by_node_construct_cli(cli, node)
+    exec = KubectlClient.exec(full_cli, namespace: self.namespace)
+    Log.debug { "ClusterTools exec: #{exec}" }
+    exec
+  end
+
+  def self.exec_by_node_bg(cli : String, node : JSON::Any)
+    # todo change to get all pods, schedulable nodes is slow
+
+    # pods_by_nodes internally use KubectlClient::Get.pods which uses --all-namespaces option.
+    # So they do not have to be passed the namespace to perform operations.
+    
+    full_cli = exec_by_node_construct_cli(cli, node)
+    Log.debug { "ClusterTools exec full cli: #{full_cli}" }
+    exec = KubectlClient.exec_bg(full_cli, namespace: self.namespace)
     Log.debug { "ClusterTools exec: #{exec}" }
     exec
   end
