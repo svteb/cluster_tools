@@ -89,6 +89,8 @@ module ClusterTools
 
     if node
       self.exec_by_node(cli, node)
+    else
+      ""
     end
   end
     
