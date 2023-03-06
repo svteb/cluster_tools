@@ -7,6 +7,7 @@ RUN make openmetricsvalidator
 FROM debian:latest
 ENV CRI_VERSION="v1.17.0"
 ENV CTR_VERSION="1.5.0"
+ENV RUNC_VERSION="v1.1.4"
 ENV CONTAINER_RUNTIME_ENDPOINT=unix:///run/containerd/containerd.sock
 ENV IMAGE_SERVICE_ENDPOINT=unix:///run/containerd/containerd.sock
 
@@ -16,6 +17,8 @@ RUN apt update && apt install -y curl sysbench skopeo net-tools strace
 RUN curl -L https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRI_VERSION}/crictl-${CRI_VERSION}-linux-amd64.tar.gz --output crictl-${CRI_VERSION}-linux-amd64.tar.gz
 RUN tar zxvf crictl-$CRI_VERSION-linux-amd64.tar.gz -C /usr/local/bin
 RUN rm -f crictl-$CRI_VERSION-linux-amd64.tar.gz
+
+RUN curl -L https://github.com/opencontainers/runc/releases/download/${RUNC_VERSION}/runc.amd64 --output /usr/local/bin/runc && chmod +x /usr/local/bin/runc
 
 RUN curl -L https://github.com/containerd/containerd/releases/download/v${CTR_VERSION}/containerd-${CTR_VERSION}-linux-amd64.tar.gz --output containerd-${CTR_VERSION}-linux-amd64.tar.gz
 RUN tar zxvf containerd-${CTR_VERSION}-linux-amd64.tar.gz -C /tmp/                                                                   
