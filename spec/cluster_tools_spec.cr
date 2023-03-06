@@ -15,16 +15,34 @@ describe "ClusterTools" do
   after_all do
     ClusterTools.uninstall
   end
-  describe "install" do
-    it "works" do
+  describe "pre install" do
+    it "ensure_namespace_exists!" do
+      (ClusterTools.ensure_namespace_exists!).should be_true
+
+      KubectlClient::Delete.command("namespace #{ClusterTools.namespace}")
+
+      expect_raises(ClusterTools::NamespaceDoesNotExistException, "ClusterTools Namespace #{ClusterTools.namespace} does not exist") do
+        ClusterTools.ensure_namespace_exists!
+      end
+    end
+
+    it "install" do
+      KubectlClient::Create.namespace(ClusterTools.namespace)
+
       (ClusterTools.install).should be_true
+
+      (ClusterTools.ensure_namespace_exists!).should be_true
     end
   end
 
-  describe "other_functions" do
+  describe "post install" do
     before_all do
       ClusterTools.install
     end
+    it "ensure_namespace_exists!",  do
+      (ClusterTools.ensure_namespace_exists!).should be_true
+    end
+
     it "pod_name",  do
       (/cluster-tools/ =~ ClusterTools.pod_name).should_not be_nil
     end

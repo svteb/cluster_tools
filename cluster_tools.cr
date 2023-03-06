@@ -29,6 +29,24 @@ module ClusterTools
     @@namespace
   end
 
+  def self.namespace!
+    self.ensure_namespace_exists!
+    @@namespace
+  end
+
+  def self.ensure_namespace_exists!
+    namespaces = KubectlClient::Get.namespaces()
+    namespace_array = namespaces["items"].as_a 
+
+    Log.debug { "ClusterTools ensure_namespace_exists namespace_array: #{namespace_array}" }
+
+    unless namespace_array.find{ |n| n.dig?("metadata", "name") == self.namespace }
+      raise NamespaceDoesNotExistException.new("ClusterTools Namespace #{self.namespace} does not exist")
+    end 
+
+    true
+  end
+
   def self.install(host_namespace = true)
     Log.info { "ClusterTools install" }
     if host_namespace
@@ -36,7 +54,7 @@ module ClusterTools
     else
       File.write("cluster_tools.yml", ManifestTemplate.new().to_s)
     end
-    KubectlClient::Apply.file("cluster_tools.yml", namespace: self.namespace)
+    KubectlClient::Apply.file("cluster_tools.yml", namespace: self.namespace!)
     wait_for_cluster_tools
   end
 
@@ -48,9 +66,9 @@ module ClusterTools
       File.write("cluster_tools.yml", ManifestTemplate.new().to_s)
     end
 
-    KubectlClient::Delete.file("cluster_tools.yml", namespace: self.namespace)
+    KubectlClient::Delete.file("cluster_tools.yml", namespace: self.namespace!)
     #todo make this work with cluster-tools-host-namespace
-    KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: self.namespace)
+    KubectlClient::Get.resource_wait_for_uninstall("Daemonset", "cluster-tools", namespace: self.namespace!)
   end
 
   def self.exec(cli : String)
@@ -62,7 +80,7 @@ module ClusterTools
     Log.info { "cluster_tools_pod_name: #{cluster_tools_pod_name}"}
 
     cmd = "-ti #{cluster_tools_pod_name} -- #{cli}"
-    KubectlClient.exec(cmd, namespace: self.namespace)
+    KubectlClient.exec(cmd, namespace: self.namespace!)
   end
 
 
@@ -147,7 +165,7 @@ module ClusterTools
 
   def self.wait_for_cluster_tools
     Log.info { "ClusterTools wait_for_cluster_tools" }
-    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: self.namespace)
+    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: self.namespace!)
     # KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools-k8s", namespace: self.namespace)
   end
 
@@ -204,12 +222,12 @@ module ClusterTools
   end
 
   def self.pod_name()
-    KubectlClient::Get.pod_status("cluster-tools", namespace: self.namespace).split(",")[0]
+    KubectlClient::Get.pod_status("cluster-tools", namespace: self.namespace!).split(",")[0]
   end
 
   def self.pod_by_node(node)
-    resource = KubectlClient::Get.resource("Daemonset", "cluster-tools", namespace: self.namespace)
-    pods = KubectlClient::Get.pods_by_resource(resource, namespace: self.namespace)
+    resource = KubectlClient::Get.resource("Daemonset", "cluster-tools", namespace: self.namespace!)
+    pods = KubectlClient::Get.pods_by_resource(resource, namespace: self.namespace!)
     cluster_pod = pods.find do |pod|
       pod.dig("spec", "nodeName") == node
     end
@@ -220,5 +238,8 @@ module ClusterTools
   def self.cluster_tools_pod_by_node(node_name)
     Log.info { "cluster_tools_pod_by_node node_name: #{node_name}" }
     cluster_tools_pod = self.pod_by_node(node_name)
+  end
+  
+  class NamespaceDoesNotExistException < Exception
   end
 end
