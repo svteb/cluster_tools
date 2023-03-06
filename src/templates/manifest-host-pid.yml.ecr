@@ -21,7 +21,7 @@ spec:
           command: ["/bin/sh"]
           args: ["-c", "sleep infinity"]
           volumeMounts:
-          - mountPath: /run/containerd/containerd.sock
+          - mountPath: /run/containerd/
             name: containerd-volume
           - mountPath: /proc
             name: proc
@@ -32,7 +32,7 @@ spec:
       volumes:
       - name: containerd-volume
         hostPath:
-          path: /var/run/containerd/containerd.sock
+          path: /var/run/containerd/
       - name: proc
         hostPath:
           path: /proc
