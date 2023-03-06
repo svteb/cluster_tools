@@ -23,6 +23,9 @@ spec:
           volumeMounts:
           - mountPath: /run/containerd/
             name: containerd-volume
+          - mountPath: /run/systemd/
+            name: systemd
+            readOnly: true
           - mountPath: /proc
             name: proc
           - mountPath: /run/dockershim.sock
@@ -39,6 +42,9 @@ spec:
       - name: dockerd-volume
         hostPath:
           path: /run/dockershim.sock
+      - name: systemd
+        hostPath:
+          path: /run/systemd
 # ---
 # apiVersion: apps/v1
 # kind: DaemonSet
