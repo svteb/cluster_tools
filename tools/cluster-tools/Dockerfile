@@ -11,6 +11,9 @@ ENV RUNC_VERSION="v1.1.4"
 ENV CONTAINER_RUNTIME_ENDPOINT=unix:///run/containerd/containerd.sock
 ENV IMAGE_SERVICE_ENDPOINT=unix:///run/containerd/containerd.sock
 
+COPY ./sleep /sleep
+COPY ./zombie /zombie
+
 COPY --from=validator /validator/bin/openmetricsvalidator /usr/local/bin/
 RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list
 RUN apt update && apt install -y curl sysbench skopeo net-tools strace
@@ -19,6 +22,10 @@ RUN tar zxvf crictl-$CRI_VERSION-linux-amd64.tar.gz -C /usr/local/bin
 RUN rm -f crictl-$CRI_VERSION-linux-amd64.tar.gz
 
 RUN curl -L https://github.com/opencontainers/runc/releases/download/${RUNC_VERSION}/runc.amd64 --output /usr/local/bin/runc && chmod +x /usr/local/bin/runc
+
+RUN curl -L https://github.com/containerd/nerdctl/releases/download/v1.2.1/nerdctl-1.2.1-linux-amd64.tar.gz --output nerdctl.tar.gz
+RUN tar zxvf nerdctl.tar.gz -C /tmp/                                                                   
+RUN mv /tmp/nerdctl /usr/local/bin/
 
 RUN curl -L https://github.com/containerd/containerd/releases/download/v${CTR_VERSION}/containerd-${CTR_VERSION}-linux-amd64.tar.gz --output containerd-${CTR_VERSION}-linux-amd64.tar.gz
 RUN tar zxvf containerd-${CTR_VERSION}-linux-amd64.tar.gz -C /tmp/                                                                   
