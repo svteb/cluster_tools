@@ -15,7 +15,7 @@ crystal: '>= 1.0.0'
 dependencies:
   kubectl_client:
     github: cnf-testsuite/kubectl_client
-    branch: '>= 1.0.0'
+    branch: '~> 1.0.0'
   docker_client:
     github: cnf-testsuite/docker_client
     branch: main
