@@ -163,7 +163,7 @@ module ClusterTools
     pid 
   end
   #each_container_by_resource(resource, namespace) do | container_id, container_pid_on_node, node, container_proctree_statuses, container_status|
-  def self.all_container_by_resource?(resource, namespace, &block) 
+  def self.all_containers_by_resource?(resource, namespace, &block) 
 		kind = resource["kind"].downcase
 		case kind
 		when  "deployment","statefulset","pod","replicaset", "daemonset"
@@ -199,14 +199,14 @@ module ClusterTools
 						Log.info { "containerStatuses container_id #{container_id}" }
 						#get container id's pid on the node (different from inside the container)
 						container_pid_on_node = "#{ClusterTools.node_pid_by_container_id(container_id, node)}"
-						if pid.empty?
+						if container_pid_on_node.empty?
 							Log.info { "no pid for (skipping): containerStatuses container_id #{container_id}" }
 							false
 							next
 						end
 
 						# next if pid.empty?
-						Log.info { "node pid (should never be pid 1): #{pid}" }
+						Log.info { "node pid (should never be pid 1): #{container_pid_on_node}" }
 
 						node_name = node.dig("metadata", "name").as_s
 						Log.info { "node name : #{node_name}" }
@@ -214,7 +214,7 @@ module ClusterTools
 						Log.info { "proctree_by_pid pids: #{pids}" }
 						proc_statuses = KernelIntrospection::K8s::Node.all_statuses_by_pids(pids, node)
 
-						container_proctree_statuses = KernelIntrospection::K8s::Node.proctree_by_pid(pid, node, proc_statuses)
+						container_proctree_statuses = KernelIntrospection::K8s::Node.proctree_by_pid(container_pid_on_node, node, proc_statuses)
 
 						yield container_id, container_pid_on_node, node, container_proctree_statuses, container_status 
 					end
