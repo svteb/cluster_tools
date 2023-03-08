@@ -162,6 +162,74 @@ module ClusterTools
     Log.info {"node_pid_by_container_id pid: #{pid}" }
     pid 
   end
+  #each_container_by_resource(resource, namespace) do | container_id, container_pid_on_node, node, container_proctree_statuses, container_status|
+  def self.all_container_by_resource?(resource, namespace, &block) 
+		kind = resource["kind"].downcase
+		case kind
+		when  "deployment","statefulset","pod","replicaset", "daemonset"
+			resource_yaml = KubectlClient::Get.resource(resource[:kind], resource[:name], resource[:namespace])
+			pods = KubectlClient::Get.pods_by_resource(resource_yaml, resource[:namespace])
+			pid_log_names  = [] of String
+			pod_resp = pods.map do |pod|
+				pod_name = pod.dig("metadata", "name")
+				Log.info { "pod_name: #{pod_name}" }
+
+				status = pod["status"]
+				if status["containerStatuses"]?
+						container_statuses = status["containerStatuses"].as_a
+					Log.info { "container_statuses: #{container_statuses}" }
+					Log.info { "pod_name: #{pod_name}" }
+					nodes = KubectlClient::Get.nodes_by_pod(pod)
+					Log.info { "nodes_by_resource done" }
+					node = nodes.first # there should only be one node returned for one pod
+					container_status_result = container_statuses.map do |container_status|
+						container_name = container_status.dig("name")
+						previous_process_type = "initial_name"
+						prefix_container_id = container_status.dig("containerID").as_s
+						container_id = prefix_container_id.gsub("containerd://", "")
+						Log.info { "before ready containerStatuses container_id #{container_id}" }
+						ready = container_status.dig("ready").as_bool
+						if !ready
+							Log.info { "container status: #{container_status} "}
+							Log.info { "not ready! skipping: containerStatuses container_id #{container_id}" }
+							false
+							next
+						end
+						# next unless ready 
+						Log.info { "containerStatuses container_id #{container_id}" }
+						#get container id's pid on the node (different from inside the container)
+						container_pid_on_node = "#{ClusterTools.node_pid_by_container_id(container_id, node)}"
+						if pid.empty?
+							Log.info { "no pid for (skipping): containerStatuses container_id #{container_id}" }
+							false
+							next
+						end
+
+						# next if pid.empty?
+						Log.info { "node pid (should never be pid 1): #{pid}" }
+
+						node_name = node.dig("metadata", "name").as_s
+						Log.info { "node name : #{node_name}" }
+						pids = KernelIntrospection::K8s::Node.pids(node)
+						Log.info { "proctree_by_pid pids: #{pids}" }
+						proc_statuses = KernelIntrospection::K8s::Node.all_statuses_by_pids(pids, node)
+
+						container_proctree_statuses = KernelIntrospection::K8s::Node.proctree_by_pid(pid, node, proc_statuses)
+
+						yield container_id, container_pid_on_node, node, container_proctree_statuses, container_status 
+					end
+          Log.info { "container_status_result.all?(true): #{container_status_result.all?(true)}" }
+          container_status_result.all?(true)
+        else
+          false
+        end
+			end
+      Log.info { "pod_resp.all?(true): #{pod_resp.all?(true)}" }                     
+      pod_resp.all?(true)
+    else
+      true # non "deployment","statefulset","pod","replicaset", and "daemonset" dont have containers
+		end
+	end
 
   def self.wait_for_cluster_tools
     Log.info { "ClusterTools wait_for_cluster_tools" }
