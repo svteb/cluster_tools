@@ -15,7 +15,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: cluster-tools
-          image: conformance/cluster-tools:v1.0.0
+          image: conformance/cluster-tools:v1.0.4
           imagePullPolicy: Always
           command: ["/bin/sh"]
           args: ["-c", "sleep infinity"]
