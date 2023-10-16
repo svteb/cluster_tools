@@ -14,6 +14,18 @@ ENV IMAGE_SERVICE_ENDPOINT=unix:///run/containerd/containerd.sock
 COPY ./sleep /sleep
 COPY ./zombie /zombie
 
+# INSTALL Wireshark
+RUN apt update && apt-get install -y build-essential git cmake bison flex libgtk-3-dev libpcap-dev libssl-dev libncurses5-dev qtbase5-dev qttools5-dev-tools qttools5-dev libqt5svg5-dev libtool libgcrypt20-dev libc-ares-dev
+
+RUN git clone https://github.com/wireshark/wireshark.git /wireshark
+RUN cd /wireshark && \
+    git checkout tags/wireshark-4.0.8 && \
+    mkdir build && \
+    cd build && \
+    cmake ../ && \
+    make -j`nproc` && \
+    make install
+
 COPY --from=validator /validator/bin/openmetricsvalidator /usr/local/bin/
 RUN echo "deb http://deb.debian.org/debian buster-backports main" >> /etc/apt/sources.list
 RUN apt update && apt install -y curl sysbench skopeo net-tools strace
