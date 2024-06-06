@@ -233,7 +233,7 @@ module ClusterTools
 
   def self.wait_for_cluster_tools
     Log.info { "ClusterTools wait_for_cluster_tools" }
-    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: self.namespace!)
+    KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools", namespace: self.namespace!, wait_count: 300)
     # KubectlClient::Get.resource_wait_for_install("Daemonset", "cluster-tools-k8s", namespace: self.namespace)
   end
 
