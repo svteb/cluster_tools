@@ -210,11 +210,11 @@ module ClusterTools
 
 						node_name = node.dig("metadata", "name").as_s
 						Log.info { "node name : #{node_name}" }
-						pids = if only_container_pids 
-                                                         KernelIntrospection::K8s::Node.pids_by_container(container_id, node)
-                                                       else
-                                                         KernelIntrospection::K8s::Node.pids(node)
-                                                       end
+						if only_container_pids 
+                                                  pids = KernelIntrospection::K8s::Node.pids_by_container(container_id, node)
+                                                else
+                                                  pids = KernelIntrospection::K8s::Node.pids(node)
+                                                end
 						Log.info { "parsed pids: #{pids}" }
 						proc_statuses = KernelIntrospection::K8s::Node.all_statuses_by_pids(pids, node)
 
